@@ -54,6 +54,21 @@ void readTest(uint8_t reg){
     printf("Received value is: %d\n", receive);
 }
 
+void startSensor(void){
+    /* power on */
+    write8(TCS34725_ENABLE, TCS34725_ENABLE_PON);
+    usleep(500);
+    /* start messure */
+    write8(TCS34725_ENABLE, TCS34725_ENABLE_PON | TCS34725_ENABLE_AEN);
+}
+
+void stopSensor(void){
+    /* Turn the device off to save power */
+    uint8_t reg = 0;
+    reg = read8(TCS34725_ENABLE);
+    write8(TCS34725_ENABLE, reg & ~(TCS34725_ENABLE_PON | TCS34725_ENABLE_AEN));
+}
+
 /**
  * @brief configSensor
  */
@@ -88,8 +103,8 @@ void initSensor(void){
  * @brief deinitializes sensor
  */
 void deinitSensor(void){
-   printf("deinit sensor\n");
-   close(i2c_fd);
+    printf("deinit sensor\n");
+    close(i2c_fd);
 }
 
 /**
@@ -104,12 +119,14 @@ int main(int argc, char** argv){
     printf("Starting Application\n");
     initSensor();
     configSensor();
+    startSensor();
     readTest(TCS34725_ID);
     id = read8(TCS34725_ID);
     printf("ID is: %d\n", id);
     readTest(TCS34725_WTIME);
     write8(TCS34725_WTIME, 0xAB);
     readTest(TCS34725_WTIME);
+    stopSensor();
     deinitSensor();
     return 0;
 }
