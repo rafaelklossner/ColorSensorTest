@@ -55,6 +55,16 @@ void readTest(uint8_t reg){
 }
 
 /**
+ * @brief configSensor
+ */
+void configSensor(void){
+    /* set integration time */
+    write8(TCS34725_ATIME, TCS34725_INTEGRATIONTIME_101MS);
+    /* set gain */
+    write8(TCS34725_CONTROL, TCS34725_GAIN_1X);
+}
+
+/**
  * @brief initializes sensor
  */
 void initSensor(void){
@@ -93,6 +103,7 @@ int main(int argc, char** argv){
 
     printf("Starting Application\n");
     initSensor();
+    configSensor();
     readTest(TCS34725_ID);
     id = read8(TCS34725_ID);
     printf("ID is: %d\n", id);
