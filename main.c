@@ -62,32 +62,48 @@ void readTest(uint8_t reg){
 
 void getData (uint16_t *r, uint16_t *g, uint16_t *b, uint16_t *c){
     if (sensorRunning == 1){
-        *c = read8(TCS34725_CDATAL);
-        *r = read8(TCS34725_RDATAL);
-        *g = read8(TCS34725_GDATAL);
-        *b = read8(TCS34725_BDATAL);
+        uint8_t cBuffer[2] = {0};
+        uint8_t rBuffer[2] = {0};
+        uint8_t gBuffer[2] = {0};
+        uint8_t bBuffer[2] = {0};
+        cBuffer[0] = read8(TCS34725_CDATAL);
+        cBuffer[1] = read8(TCS34725_CDATAL);
+        rBuffer[0] = read8(TCS34725_RDATAL);
+        rBuffer[1] = read8(TCS34725_RDATAL);
+        gBuffer[0] = read8(TCS34725_GDATAL);
+        gBuffer[1] = read8(TCS34725_GDATAL);
+        bBuffer[0] = read8(TCS34725_BDATAL);
+        bBuffer[1] = read8(TCS34725_BDATAL);
+        *c = ( (cBuffer[1] << 8) | cBuffer[0] );
+        *r = ( (rBuffer[1] << 8) | rBuffer[0] );
+        *g = ( (gBuffer[1] << 8) | gBuffer[0] );
+        *b = ( (bBuffer[1] << 8) | bBuffer[0] );
     }else{
         printf("Sensor not ready --> call sensorInit() and startSensor() first\n");
     }
 }
 
 void startSensor(void){
-    /* power on */
-    write8(TCS34725_ENABLE, TCS34725_ENABLE_PON);
-    usleep(500);
-    /* start messure */
-    write8(TCS34725_ENABLE, TCS34725_ENABLE_PON | TCS34725_ENABLE_AEN);
-    /* set status on running */
-    sensorRunning = 1;
+    if (sensorConnected == 1){
+        /* power on */
+        write8(TCS34725_ENABLE, TCS34725_ENABLE_PON);
+        usleep(500);
+        /* start messure */
+        write8(TCS34725_ENABLE, TCS34725_ENABLE_PON | TCS34725_ENABLE_AEN);
+        /* set status on running */
+        sensorRunning = 1;
+    }
 }
 
 void stopSensor(void){
-    /* Turn the device off to save power */
-    uint8_t reg = 0;
-    reg = read8(TCS34725_ENABLE);
-    write8(TCS34725_ENABLE, reg & ~(TCS34725_ENABLE_PON | TCS34725_ENABLE_AEN));
-    /* set status on stop */
-    sensorRunning = 0;
+    if (sensorConnected == 1){
+        /* Turn the device off to save power */
+        uint8_t reg = 0;
+        reg = read8(TCS34725_ENABLE);
+        write8(TCS34725_ENABLE, reg & ~(TCS34725_ENABLE_PON | TCS34725_ENABLE_AEN));
+        /* set status on stop */
+        sensorRunning = 0;
+    }
 }
 
 /**
