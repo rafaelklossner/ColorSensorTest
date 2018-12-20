@@ -12,6 +12,18 @@
 /* private variables */
 static int i2c_fd;
 
+void readTest(uint8_t reg){
+    uint8_t receive = 0;
+    reg = reg | TCS34725_COMMAND_BIT;
+    if (write(i2c_fd, &reg, 1) != 1){
+        perror("write error!");
+    }
+    if (read(i2c_fd, &receive, 1) != 1){
+        perror("read error!");
+    }
+    printf("Received value is: %d\n", receive);
+}
+
 /**
  * @brief initializes sensor
  */
@@ -50,6 +62,7 @@ int main(int argc, char** argv){
 
     printf("Starting Application\n");
     initSensor();
+    readTest(TCS34725_ID);
     deinitSensor();
     return 0;
 }
