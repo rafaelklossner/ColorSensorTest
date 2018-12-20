@@ -11,8 +11,14 @@
 
 /* private variables */
 static int i2c_fd;
-static int ready = 0;
+static int sensorConnected = 0;
+static int sensorRunning = 0;
 
+/**
+ * @brief write8
+ * @param reg
+ * @param value
+ */
 void write8(uint8_t reg, uint8_t value){
     reg = reg | TCS34725_COMMAND_BIT;
     uint8_t buffer[2] = {reg, value};
@@ -54,12 +60,25 @@ void readTest(uint8_t reg){
     printf("Received value is: %d\n", receive);
 }
 
+void getData (uint16_t *r, uint16_t *g, uint16_t *b, uint16_t *c){
+    if (sensorRunning == 1){
+        *c = read8(TCS34725_CDATAL);
+        *r = read8(TCS34725_RDATAL);
+        *g = read8(TCS34725_GDATAL);
+        *b = read8(TCS34725_BDATAL);
+    }else{
+        printf("Sensor not ready --> call sensorInit() and startSensor() first\n");
+    }
+}
+
 void startSensor(void){
     /* power on */
     write8(TCS34725_ENABLE, TCS34725_ENABLE_PON);
     usleep(500);
     /* start messure */
     write8(TCS34725_ENABLE, TCS34725_ENABLE_PON | TCS34725_ENABLE_AEN);
+    /* set status on running */
+    sensorRunning = 1;
 }
 
 void stopSensor(void){
@@ -67,6 +86,8 @@ void stopSensor(void){
     uint8_t reg = 0;
     reg = read8(TCS34725_ENABLE);
     write8(TCS34725_ENABLE, reg & ~(TCS34725_ENABLE_PON | TCS34725_ENABLE_AEN));
+    /* set status on stop */
+    sensorRunning = 0;
 }
 
 /**
@@ -82,7 +103,7 @@ void configSensor(void){
 /**
  * @brief initializes sensor
  */
-void initSensor(void){
+uint8_t initSensor(void){
     printf("init sensor\n");
 
     /* Open the Linux i2c device */
@@ -96,6 +117,21 @@ void initSensor(void){
     if (ioctl(i2c_fd, I2C_SLAVE, TCS34725_ADDRESS) < 0){
         perror("i2cSetAddress");
         exit(1);
+    }
+
+    /* check if connection ready */
+    uint8_t checkValue = 0x77;
+    uint8_t oldValue = read8(TCS34725_WTIME);
+    write8(TCS34725_WTIME, checkValue);
+    uint8_t newValue = read8(TCS34725_WTIME);
+    write8(TCS34725_WTIME, oldValue);
+    if(oldValue != newValue && checkValue == newValue){
+        sensorConnected = 1;
+        printf("sensor is now connected\n");
+        return 0;
+    }else{
+        printf("no connection\n");
+        return 1;
     }
 }
 
@@ -114,20 +150,18 @@ void deinitSensor(void){
 int main(int argc, char** argv){
     (void) argc;
     (void) argv;
-    uint8_t id;
+    uint16_t r,g,b,c;
 
     printf("Starting Application\n");
-    initSensor();
-    configSensor();
-    startSensor();
-    readTest(TCS34725_ID);
-    id = read8(TCS34725_ID);
-    printf("ID is: %d\n", id);
-    readTest(TCS34725_WTIME);
-    write8(TCS34725_WTIME, 0xAB);
-    readTest(TCS34725_WTIME);
-    stopSensor();
-    deinitSensor();
+    if(initSensor() == 0){
+        configSensor();
+        startSensor();
+        usleep(105000);
+        getData(&r, &g, &b, &c);
+        printf("r: %d, g: %d, b: %d, c: %d\n", r, g, b, c);
+        stopSensor();
+        deinitSensor();
+    }
     return 0;
 }
 
