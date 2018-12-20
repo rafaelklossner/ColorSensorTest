@@ -13,6 +13,14 @@
 static int i2c_fd;
 static int ready = 0;
 
+void write8(uint8_t reg, uint8_t value){
+    reg = reg | TCS34725_COMMAND_BIT;
+    uint8_t buffer[2] = {reg, value};
+    if (write(i2c_fd, buffer, 2) != 2){
+        perror("write error!");
+    }
+}
+
 /**
  * @brief read8
  * @param reg
@@ -88,6 +96,9 @@ int main(int argc, char** argv){
     readTest(TCS34725_ID);
     id = read8(TCS34725_ID);
     printf("ID is: %d\n", id);
+    readTest(TCS34725_WTIME);
+    write8(TCS34725_WTIME, 0xAB);
+    readTest(TCS34725_WTIME);
     deinitSensor();
     return 0;
 }
