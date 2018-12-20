@@ -62,21 +62,33 @@ void readTest(uint8_t reg){
 
 void getData (uint16_t *r, uint16_t *g, uint16_t *b, uint16_t *c){
     if (sensorRunning == 1){
+        printf("2.1\n");
         uint8_t cBuffer[2] = {0};
         uint8_t rBuffer[2] = {0};
         uint8_t gBuffer[2] = {0};
         uint8_t bBuffer[2] = {0};
+        printf("2.2\n");
         cBuffer[0] = read8(TCS34725_CDATAL);
-        cBuffer[1] = read8(TCS34725_CDATAL);
-        rBuffer[0] = read8(TCS34725_RDATAL);
-        rBuffer[1] = read8(TCS34725_RDATAL);
-        gBuffer[0] = read8(TCS34725_GDATAL);
-        gBuffer[1] = read8(TCS34725_GDATAL);
-        bBuffer[0] = read8(TCS34725_BDATAL);
-        bBuffer[1] = read8(TCS34725_BDATAL);
+        printf("2.3\n");
+        usleep(100);
+        cBuffer[1] = read8(TCS34725_CDATAH);
+        printf("2.4\n");
         *c = ( (cBuffer[1] << 8) | cBuffer[0] );
+        printf("2.5\n");
+
+        rBuffer[0] = read8(TCS34725_RDATAL);
+        usleep(100);
+        rBuffer[1] = read8(TCS34725_RDATAH);
         *r = ( (rBuffer[1] << 8) | rBuffer[0] );
+
+        gBuffer[0] = read8(TCS34725_GDATAL);
+        usleep(100);
+        gBuffer[1] = read8(TCS34725_GDATAH);
         *g = ( (gBuffer[1] << 8) | gBuffer[0] );
+
+        bBuffer[0] = read8(TCS34725_BDATAL);
+        usleep(100);
+        bBuffer[1] = read8(TCS34725_BDATAH);
         *b = ( (bBuffer[1] << 8) | bBuffer[0] );
     }else{
         printf("Sensor not ready --> call sensorInit() and startSensor() first\n");
@@ -137,10 +149,18 @@ uint8_t initSensor(void){
 
     /* check if connection ready */
     uint8_t checkValue = 0x77;
+    printf("init 1\n");
     uint8_t oldValue = read8(TCS34725_WTIME);
+    printf("init 2\n");
+    usleep(100);
     write8(TCS34725_WTIME, checkValue);
+    printf("init 3\n");
+    usleep(100);
     uint8_t newValue = read8(TCS34725_WTIME);
+    printf("init 4\n");
+    usleep(100);
     write8(TCS34725_WTIME, oldValue);
+    printf("init 5\n");
     if(oldValue != newValue && checkValue == newValue){
         sensorConnected = 1;
         printf("sensor is now connected\n");
@@ -166,15 +186,26 @@ void deinitSensor(void){
 int main(int argc, char** argv){
     (void) argc;
     (void) argv;
+    int i = 100;
     uint16_t r,g,b,c;
 
     printf("Starting Application\n");
     if(initSensor() == 0){
         configSensor();
         startSensor();
-        usleep(105000);
-        getData(&r, &g, &b, &c);
-        printf("r: %d, g: %d, b: %d, c: %d\n", r, g, b, c);
+
+        while (i > 0) {
+            printf("1\n");
+            usleep(200000);
+            printf("2\n");
+            getData(&r, &g, &b, &c);
+            printf("3\n");
+            printf("r: %d, g: %d, b: %d, c: %d\n", r, g, b, c);
+            printf("4\n");
+            i--;
+            printf("5\n");
+        }
+
         stopSensor();
         deinitSensor();
     }
