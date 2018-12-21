@@ -1,7 +1,6 @@
 /*TODO
  * Extract functions to sensor.c
  * Add declarations of local an global functions
- * Remove delays in code an add them in the read8 and write8 functions
  * Solve i2c-4 problem --> must touch display to continue (display also on i2c-4 bus)
  */
 
@@ -34,6 +33,7 @@ void write8(uint8_t reg, uint8_t value){
     if (write(i2c_fd, buffer, 2) != 2){
         perror("write error!");
     }
+    usleep(100);
 }
 
 /**
@@ -53,6 +53,7 @@ uint8_t read8(uint8_t reg){
     if (read(i2c_fd, &receive, 1) != 1){
         perror("read error!");
     }
+    usleep(100);
     return receive;
 }
 
@@ -92,22 +93,18 @@ void getData (uint16_t *r, uint16_t *g, uint16_t *b, uint16_t *c){
 
         /* receive and process data */
         cBuffer[0] = read8(TCS34725_CDATAL);
-        usleep(100);
         cBuffer[1] = read8(TCS34725_CDATAH);
         *c = ( (cBuffer[1] << 8) | cBuffer[0] );
 
         rBuffer[0] = read8(TCS34725_RDATAL);
-        usleep(100);
         rBuffer[1] = read8(TCS34725_RDATAH);
         *r = ( (rBuffer[1] << 8) | rBuffer[0] );
 
         gBuffer[0] = read8(TCS34725_GDATAL);
-        usleep(100);
         gBuffer[1] = read8(TCS34725_GDATAH);
         *g = ( (gBuffer[1] << 8) | gBuffer[0] );
 
         bBuffer[0] = read8(TCS34725_BDATAL);
-        usleep(100);
         bBuffer[1] = read8(TCS34725_BDATAH);
         *b = ( (bBuffer[1] << 8) | bBuffer[0] );
     }else{ /* if not print a message to console */
@@ -123,7 +120,6 @@ void startSensor(void){
     if (sensorConnected == 1){
         /* power on */
         write8(TCS34725_ENABLE, TCS34725_ENABLE_PON);
-        usleep(500);
         /* start messure */
         write8(TCS34725_ENABLE, TCS34725_ENABLE_PON | TCS34725_ENABLE_AEN);
         /* set status on running */
@@ -181,11 +177,8 @@ int8_t initSensor(void){
         /* check if connection ready */
         uint8_t checkValue = 0x77;
         uint8_t oldValue = read8(TCS34725_WTIME);
-        usleep(100);
         write8(TCS34725_WTIME, checkValue);
-        usleep(100);
         uint8_t newValue = read8(TCS34725_WTIME);
-        usleep(100);
         write8(TCS34725_WTIME, oldValue);
         if(oldValue != newValue && checkValue == newValue){
             /* let the program continue */
