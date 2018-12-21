@@ -1,7 +1,6 @@
 /*TODO
  * Extract functions to sensor.c
  * Add declarations of local an global functions
- * Remove printf's
  * Remove delays in code an add them in the read8 and write8 functions
  * Solve i2c-4 problem --> must touch display to continue (display also on i2c-4 bus)
  */
@@ -86,21 +85,16 @@ void readTest(uint8_t reg){
 void getData (uint16_t *r, uint16_t *g, uint16_t *b, uint16_t *c){
     /* check if sensor is running */
     if (sensorRunning == 1){
-        printf("2.1\n");
         uint8_t cBuffer[2] = {0};
         uint8_t rBuffer[2] = {0};
         uint8_t gBuffer[2] = {0};
         uint8_t bBuffer[2] = {0};
 
         /* receive and process data */
-        printf("2.2\n");
         cBuffer[0] = read8(TCS34725_CDATAL);
-        printf("2.3\n");
         usleep(100);
         cBuffer[1] = read8(TCS34725_CDATAH);
-        printf("2.4\n");
         *c = ( (cBuffer[1] << 8) | cBuffer[0] );
-        printf("2.5\n");
 
         rBuffer[0] = read8(TCS34725_RDATAL);
         usleep(100);
@@ -243,15 +237,10 @@ int main(int argc, char** argv){
         /* test while */
         int i = 100;
         while (i > 0) {
-            printf("1\n");
             usleep(200000); /* do not forget to sleep during integration time */
-            printf("2\n");
             getData(&r, &g, &b, &c);
-            printf("3\n");
             printf("r: %d, g: %d, b: %d, c: %d\n", r, g, b, c);
-            printf("4\n");
             i--;
-            printf("5\n");
         }
 
         stopSensor();
