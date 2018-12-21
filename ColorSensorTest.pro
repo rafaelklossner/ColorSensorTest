@@ -4,7 +4,8 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-        main.c
+        main.c \
+    sensor.c
 
 HEADERS += \
     sensor.h
