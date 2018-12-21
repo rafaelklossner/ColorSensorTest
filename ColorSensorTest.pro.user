@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.6.2, 2018-12-21T00:54:55. -->
+<!-- Written by QtCreator 4.6.2, 2018-12-21T01:10:54. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -290,7 +290,7 @@
        <value type="QString">/opt/embedded/firefly/rootfs</value>
       </valuelist>
       <valuelist type="QVariantList" key="ProjectExplorer.RunConfiguration.LastDeployedTimes">
-       <value type="QDateTime">2018-12-21T00:53:47.440</value>
+       <value type="QDateTime">2018-12-21T01:08:50.736</value>
       </valuelist>
       <value type="bool" key="RemoteLinux.GenericDirectUploadStep.IgnoreMissingFiles">false</value>
       <value type="bool" key="RemoteLinux.GenericDirectUploadStep.Incremental">true</value>

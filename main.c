@@ -220,7 +220,7 @@ int main(int argc, char** argv){
     int8_t status;
     uint16_t r,g,b,c;
 
-    printf("Starting Application\n");
+    printf("Starting Application Color Sensing\n");
     status = initSensor();
     /* check if initialization was successful */
     if(status == 1){
